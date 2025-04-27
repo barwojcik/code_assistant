@@ -98,6 +98,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // Handle Copy to Input button click
+    document.getElementById('copyToInputButton').addEventListener('click', function() {
+        const outputCode = outputCodeEditor.getValue();
+        
+        // Copy to input editor
+        inputCodeEditor.setValue(outputCode);
+        
+        // Provide visual feedback
+        const copyToInputButton = document.getElementById('copyToInputButton');
+        copyToInputButton.textContent = '✓';
+        copyToInputButton.classList.add('copied');
+        
+        // Reset button text after 2 seconds
+        setTimeout(function() {
+            copyToInputButton.textContent = '<';
+            copyToInputButton.classList.remove('copied');
+        }, 2000);
+    });
+    
     // Handle Reset button click
     document.getElementById('resetButton').addEventListener('click', function() {
         document.getElementById('instructions').value = '';

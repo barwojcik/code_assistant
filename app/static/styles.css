@@ -52,7 +52,12 @@ label {
     font-size: 12px;
 }
 
-#copyButton {
+.output-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+#copyButton, #copyToInputButton {
     background-color: #38383d;
     color: #b1b1b3;
     border: 1px solid #52525e;
@@ -63,15 +68,15 @@ label {
     transition: all 0.2s ease;
 }
 
-#copyButton:hover {
+#copyButton:hover, #copyToInputButton:hover {
     background-color: #4a4a4f;
 }
 
-#copyButton:active {
+#copyButton:active, #copyToInputButton:active {
     background-color: #323234;
 }
 
-#copyButton.copied {
+#copyButton.copied, #copyToInputButton.copied {
     background-color: #45a1ff;
     color: #0c0c0d;
     border-color: #45a1ff;
