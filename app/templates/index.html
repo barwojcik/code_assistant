@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Code Editor</title>
+
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/shadowfox.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/scroll/simplescrollbars.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/scroll/simplescrollbars.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/comment/comment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/python-hint.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="input-group">
+                <label for="instructions">Instructions:</label>
+                <textarea id="instructions" placeholder="Enter your instructions here..."></textarea>
+            </div>
+            <div class="input-group">
+                <label for="codeInput">Python Code:</label>
+                <textarea id="codeInput"></textarea>
+            </div>
+            <div class="button-group">
+                <button id="sendButton">Send</button>
+                <button id="resetButton">Reset</button>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div class="output-group">
+                <div class="label-container">
+                    <label>Output:</label>
+                    <button id="copyButton" title="Copy to clipboard">Copy</button>
+                </div>
+                <textarea id="codeOutput"></textarea>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,211 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+    background-color: #2a2a2e;
+    color: #b1b1b3;
+    display: flex;
+    justify-content: center;
+    font-size: 13px;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+    width: 1200px;
+    max-width: 100%;
+}
+
+.left-panel {
+    width: 50%;
+    padding: 15px;
+    border-right: 1px solid #38383d;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.right-panel {
+    width: 50%;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.input-group, .output-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.label-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+label {
+    color: #75bfff;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+#copyButton {
+    background-color: #38383d;
+    color: #b1b1b3;
+    border: 1px solid #52525e;
+    border-radius: 3px;
+    font-size: 11px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#copyButton:hover {
+    background-color: #4a4a4f;
+}
+
+#copyButton:active {
+    background-color: #323234;
+}
+
+#copyButton.copied {
+    background-color: #45a1ff;
+    color: #0c0c0d;
+    border-color: #45a1ff;
+}
+
+#instructions {
+    height: 80px;
+    background-color: #1c1b22;
+    border: 1px solid #38383d;
+    border-radius: 3px;
+    color: #b1b1b3;
+    padding: 8px;
+    resize: none;
+    margin-bottom: 15px;
+    font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+}
+
+.CodeMirror {
+    height: 300px !important;
+    border: 1px solid #38383d;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+}
+
+.button-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+button {
+    padding: 6px 14px;
+    background-color: #0060df;
+    color: #ffffff;
+    border: 1px solid #0060df;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: normal;
+    transition: all 0.2s ease;
+    font-size: 12px;
+}
+
+button:hover {
+    background-color: #0a84ff;
+    border-color: #0a84ff;
+}
+
+button:active {
+    background-color: #0052cc;
+    border-color: #0052cc;
+}
+
+#instructions:focus, .CodeMirror-focused {
+    outline: none;
+    border-color: #45a1ff;
+}
+
+.output-group {
+    flex: 1;
+}
+
+.output-group .CodeMirror {
+    height: calc(100vh - 100px) !important;
+}
+
+/* CodeMirror ShadowFox theme overrides - ensuring our styles take precedence */
+.CodeMirror {
+    background-color: #1c1b22 !important;
+}
+
+.CodeMirror-gutters {
+    background-color: #1c1b22 !important;
+    border-right: 1px solid #38383d !important;
+}
+
+.CodeMirror-linenumber {
+    color: #737373 !important;
+}
+
+.CodeMirror-cursor {
+    border-left: 2px solid #b1b1b3 !important;
+}
+
+.CodeMirror-selected {
+    background-color: rgba(58, 113, 193, 0.3) !important;
+}
+
+/* Disable wrapping and add horizontal scrollbar */
+.CodeMirror-scroll {
+    overflow-x: auto !important;
+}
+
+.CodeMirror-hscrollbar, .CodeMirror-vscrollbar {
+    height: 10px !important;
+}
+
+/* CodeMirror specific scrollbar styles */
+.CodeMirror-simplescroll-horizontal, .CodeMirror-simplescroll-vertical {
+    background: #1a1a1c !important;
+    border: 1px solid #1c1b22 !important;
+}
+
+.CodeMirror-simplescroll-horizontal div, .CodeMirror-simplescroll-vertical div {
+    background: #38383d !important;
+    border: 1px solid #38383d !important;
+    border-radius: 3px !important;
+}
+
+.CodeMirror-simplescroll-horizontal div:hover, .CodeMirror-simplescroll-vertical div:hover {
+    background: #45a1ff !important;
+}
+
+/* Scrollbar styling to match ShadowFox */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a1c;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #38383d;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #45a1ff;
+}
+
+/* Add a subtle border to the code panel */
+.CodeMirror pre.CodeMirror-line {
+    border-radius: 0;
+}
