@@ -19,13 +19,23 @@ OLLAMA_MODEL = 'llama3.2:1b'
 # Define the route for the index page
 @app.route('/', methods=['GET'])
 def index() -> str:
-    """Render the index page for the chatbot."""
+    """Render the index page for the application."""
     return render_template('index.html')  # Render the index.html template
 
 # Define the route for processing instructions
 @app.route('/process-instruction', methods=['POST'])
 def process_instruction_route():
-    """Process user messages and return chatbot responses."""
+    """
+        Process an instruction by generating Python code based on user input.
+
+        This function takes in two JSON parameters:
+            - 'userInstruction': The text of the instruction provided by the user.
+            - 'userCode': A snippet of Python code that is expected to be used as input for this process.
+
+        It then sends a POST request to an OLLAMA model endpoint with the instructions and generates a response
+        from the server. The response is the generated Python code followed by any additional context or feedback
+        from the server.
+    """
     try:
         # Extract the user's inputs
         user_instruction = request.json['userInstruction']
