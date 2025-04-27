@@ -35,13 +35,46 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', refreshEditors);
 
     // Handle Send button click
-    document.getElementById('sendButton').addEventListener('click', function() {
+    document.getElementById('sendButton').addEventListener('click', async function() {
         const instructions = document.getElementById('instructions').value;
         const code = inputCodeEditor.getValue();
-
-        // Here you would typically send the data to your backend
-        // For now, we'll just display the input code in the output area
-        outputCodeEditor.setValue(code);
+    
+        try {
+            // Show loading state
+            const sendButton = document.getElementById('sendButton');
+            sendButton.textContent = 'Processing...';
+            sendButton.disabled = true;
+            
+            // Send data to the backend
+            const response = await fetch('/process-instruction', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userInstruction: instructions,
+                    userCode: code
+                })
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+    
+            const data = await response.json();
+            
+            // Display the processed code from the backend
+            outputCodeEditor.setValue(data.output);
+        } catch (error) {
+            console.error('Error:', error);
+            // Display error in the output area
+            outputCodeEditor.setValue(`Error: ${error.message || 'Failed to process request'}`);
+        } finally {
+            // Reset button state
+            const sendButton = document.getElementById('sendButton');
+            sendButton.textContent = 'Send';
+            sendButton.disabled = false;
+        }
     });
 
     // Handle Copy button click
