@@ -24,6 +24,11 @@ document.addEventListener('DOMContentLoaded', function() {
         readOnly: true
     });
 
+    // Current response data storage
+    let currentResponseData = null;
+    let displayMode = 'code'; // Default to code mode
+    const markdownOutput = document.getElementById('markdownOutput');
+    
     // Ensure proper horizontal scrolling
     function refreshEditors() {
         inputCodeEditor.refresh();
@@ -33,6 +38,74 @@ document.addEventListener('DOMContentLoaded', function() {
     // Refresh after initialization and on window resize
     setTimeout(refreshEditors, 100);
     window.addEventListener('resize', refreshEditors);
+    
+    // Initialize marked with options
+    marked.setOptions({
+        breaks: true,
+        gfm: true,
+        headerIds: false
+    });
+    
+    // Handle display mode toggle
+    document.getElementById('displayModeToggle').addEventListener('change', function() {
+        const isRawMode = this.checked;
+        displayMode = isRawMode ? 'raw' : 'code';
+        
+        // Update toggle labels
+        document.querySelectorAll('.toggle-label').forEach(label => {
+            if (label.dataset.mode === displayMode) {
+                label.classList.add('active');
+            } else {
+                label.classList.remove('active');
+            }
+        });
+        
+        // Toggle visibility of code editor and markdown container
+        if (displayMode === 'raw') {
+            outputCodeEditor.getWrapperElement().style.display = 'none';
+            markdownOutput.style.display = 'block';
+        } else {
+            outputCodeEditor.getWrapperElement().style.display = 'block';
+            markdownOutput.style.display = 'none';
+        }
+        
+        // Update display if we have data
+        if (currentResponseData) {
+            updateOutputDisplay();
+        }
+    });
+    
+    // Handle toggle label clicks
+    document.querySelectorAll('.toggle-label').forEach(label => {
+        label.addEventListener('click', function() {
+            const mode = this.dataset.mode;
+            const toggle = document.getElementById('displayModeToggle');
+            
+            if (mode === 'raw') {
+                toggle.checked = true;
+            } else {
+                toggle.checked = false;
+            }
+            
+            // Trigger the change event
+            const event = new Event('change');
+            toggle.dispatchEvent(event);
+        });
+    });
+    
+    // Function to update the output display based on the current mode
+    function updateOutputDisplay() {
+        if (!currentResponseData) return;
+        
+        if (displayMode === 'raw') {
+            // Render markdown for raw response
+            const rawContent = currentResponseData.raw_response || 'No raw response available';
+            markdownOutput.innerHTML = marked.parse(rawContent);
+        } else {
+            // Update code editor
+            outputCodeEditor.setValue(currentResponseData.output);
+        }
+    }
 
     // Handle Send button click
     document.getElementById('sendButton').addEventListener('click', async function() {
@@ -61,14 +134,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(`Server responded with status: ${response.status}`);
             }
     
-            const data = await response.json();
+            currentResponseData = await response.json();
             
-            // Display the processed code from the backend
-            outputCodeEditor.setValue(data.output);
+            // Display the processed output based on current mode
+            updateOutputDisplay();
         } catch (error) {
             console.error('Error:', error);
             // Display error in the output area
             outputCodeEditor.setValue(`Error: ${error.message || 'Failed to process request'}`);
+            currentResponseData = null;
         } finally {
             // Reset button state
             const sendButton = document.getElementById('sendButton');
@@ -79,10 +153,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle Copy button click
     document.getElementById('copyButton').addEventListener('click', function() {
-        const outputCode = outputCodeEditor.getValue();
+        // Get content based on current display mode
+        let contentToCopy;
+        
+        if (displayMode === 'raw' && currentResponseData) {
+            contentToCopy = currentResponseData.raw_response || '';
+        } else {
+            contentToCopy = outputCodeEditor.getValue();
+        }
         
         // Copy to clipboard
-        navigator.clipboard.writeText(outputCode).then(function() {
+        navigator.clipboard.writeText(contentToCopy).then(function() {
             // Provide visual feedback
             const copyButton = document.getElementById('copyButton');
             copyButton.textContent = 'Copied!';
@@ -100,10 +181,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Handle Copy to Input button click
     document.getElementById('copyToInputButton').addEventListener('click', function() {
-        const outputCode = outputCodeEditor.getValue();
+        // Always copy the code content (not raw) to input
+        const contentToCopy = currentResponseData ? currentResponseData.output : outputCodeEditor.getValue();
         
         // Copy to input editor
-        inputCodeEditor.setValue(outputCode);
+        inputCodeEditor.setValue(contentToCopy);
         
         // Provide visual feedback
         const copyToInputButton = document.getElementById('copyToInputButton');
@@ -119,8 +201,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Handle Reset button click
     document.getElementById('resetButton').addEventListener('click', function() {
+        // Reset all inputs and outputs
         document.getElementById('instructions').value = '';
         inputCodeEditor.setValue('');
+        
+        // Reset both output displays regardless of which is visible
         outputCodeEditor.setValue('');
+        markdownOutput.innerHTML = '';
+        
+        // Clear the stored response data
+        currentResponseData = null;
+    
+        // Force a refresh of the CodeMirror instance
+        outputCodeEditor.refresh();
     });
 });

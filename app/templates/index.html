@@ -22,6 +22,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/comment/comment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/python-hint.min.js"></script>
+    
+    <!-- Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
@@ -47,11 +50,22 @@
                 <div class="label-container">
                     <label>Output:</label>
                     <div class="output-buttons">
+                        <div class="toggle-container">
+                            <span class="toggle-label active" data-mode="code">Code</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="displayModeToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label" data-mode="raw">Raw</span>
+                        </div>
                         <button id="copyToInputButton" title="Copy to input">&lt;</button>
                         <button id="copyButton" title="Copy to clipboard">Copy</button>
                     </div>
                 </div>
-                <textarea id="codeOutput"></textarea>
+                <div class="editor-container">
+                    <textarea id="codeOutput"></textarea>
+                    <div id="markdownOutput" class="markdown-output"></div>
+                </div>
             </div>
         </div>
     </div>

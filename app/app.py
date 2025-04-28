@@ -44,12 +44,13 @@ def process_instruction_route():
         app.logger.info('User instruction: %s for code: %s', user_instruction, user_code)
 
         # Generate Python code
-        output_code = code_generator.generate_code(user_instruction, user_code)
+        response_text, output_code = code_generator.generate_code(user_instruction, user_code)
         app.logger.info('Output code: %s', output_code)
 
         # Return response as JSON
         return jsonify({
             'output': output_code,
+            'raw_response': response_text,
         }), 200
 
     except KeyError as e:

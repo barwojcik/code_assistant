@@ -129,4 +129,4 @@ class OllamaCodeGenerator:
         output_code: str = response_text.split("```python\n")[1].split("```")[0]
         logger.debug('Generated code: %s', output_code)
 
-        return output_code
+        return response_text, output_code
