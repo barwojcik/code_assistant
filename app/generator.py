@@ -103,6 +103,36 @@ class OllamaCodeGenerator:
             f'{user_code}\n generate python code.'
         )
 
+    @staticmethod
+    def _get_code(response_text: str) -> str:
+        """
+        Extracts code from markdown-formatted text that contains code blocks.
+
+        Args:
+            response_text (str): String containing markdown-formatted text with possible code blocks
+
+        Returns:
+            str: Extracted code with leading/trailing whitespace removed
+        """
+        output_code: str = response_text
+        if output_code.count("```") < 2:
+            return output_code
+
+        if "```python\n" in output_code:
+            output_code = output_code.split("```python\n")[1].split("```")[0]
+            if output_code.endswith("\n"):
+                output_code = output_code[:-1]
+        else:
+            output_code = output_code.split("```")[1].split("```")[0]
+
+        if output_code.startswith("\n"):
+            output_code = output_code[1:]
+
+        if output_code.endswith("\n"):
+            output_code = output_code[:-1]
+
+        return output_code
+
     def generate_code(self, user_instruction: str, user_code: Optional[str] = None) -> str:
         """
         Generate a Python code based on the provided instructions.
@@ -126,7 +156,7 @@ class OllamaCodeGenerator:
         response_text: str = ollama_response.response
         logger.debug('Response text: %s', response_text)
 
-        output_code: str = response_text.split("```python\n")[1].split("```")[0]
+        output_code: str = self._get_code(response_text)
         logger.debug('Generated code: %s', output_code)
 
         return response_text, output_code
