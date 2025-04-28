@@ -1,7 +1,6 @@
 """
 Code Assistant
 """
-import requests
 from flask import Flask, render_template, request, jsonify, Response
 from flask_cors import CORS
 from dataclasses import asdict
@@ -18,7 +17,7 @@ cfg = app.config
 app.logger.setLevel(cfg['LOG_LEVEL'])
 
 code_generator = OllamaCodeGenerator.from_config(cfg['OLLAMA'])
-history = HistoryHandler()
+history = HistoryHandler(max_length=cfg['MAX_HISTORY_LENGTH'])
 
 # Define the route for the index page
 @app.route('/', methods=['GET'])

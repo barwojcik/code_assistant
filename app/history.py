@@ -14,7 +14,6 @@ class HistoryEntry:
     timestamp: datetime = field(default_factory=datetime.now)
 
 
-@dataclass
 class HistoryHandler:
     """
     A class to manage and store history entries.

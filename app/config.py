@@ -6,8 +6,9 @@ import logging
 
 DEBUG = True
 TESTING = True
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.DEBUG
 OLLAMA=dict(
     ollama_host='http://localhost:11434',
     ollama_model='llama3.2:1b'
 )
+MAX_HISTORY_LENGTH = 10
