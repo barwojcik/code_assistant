@@ -58,11 +58,11 @@ class OllamaCodeGenerator:
             generate_kwargs (Optional[dict[str, Any]]): Additional keyword arguments to pass to the generate() method.
         """
         logger.info('Initializing OllamaCodeGenerator with model: %s', ollama_model)
-        self.ollama_model = ollama_model
-        self._client = Client(host=ollama_host)
+        self.ollama_model: str = ollama_model
+        self._client: Client = Client(host=ollama_host)
         if prompt_function:
             self._get_prompt = prompt_function
-        self.generate_kwargs = (generate_kwargs or dict())
+        self.generate_kwargs: dict = (generate_kwargs or dict())
 
     @classmethod
     def from_config(cls, generator_config: dict[str, Any]) -> "OllamaCodeGenerator":
@@ -133,7 +133,11 @@ class OllamaCodeGenerator:
 
         return output_code
 
-    def generate_code(self, user_instruction: str, user_code: Optional[str] = None) -> str:
+    def generate_code(
+            self,
+            user_instruction: str,
+            user_code: Optional[str] = None
+    ) -> tuple[str, str]:
         """
         Generate a Python code based on the provided instructions.
 
