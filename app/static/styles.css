@@ -54,7 +54,72 @@ label {
 
 .output-buttons {
     display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.toggle-container {
+    display: flex;
+    align-items: center;
     gap: 4px;
+    margin-right: 4px;
+}
+
+.toggle-label {
+    font-size: 11px;
+    color: #737373;
+    cursor: pointer;
+}
+
+.toggle-label.active {
+    color: #75bfff;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 32px;
+    height: 16px;
+    margin: 0;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #38383d;
+    border: 1px solid #52525e;
+    border-radius: 8px;
+    transition: .3s;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 10px;
+    width: 10px;
+    left: 3px;
+    bottom: 2px;
+    background-color: #b1b1b3;
+    border-radius: 50%;
+    transition: .3s;
+}
+
+input:checked + .toggle-slider {
+    background-color: #38383d;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(16px);
 }
 
 #copyButton, #copyToInputButton {
@@ -140,8 +205,83 @@ button:active {
     flex: 1;
 }
 
+.editor-container {
+    position: relative;
+    height: 100%;
+}
+
 .output-group .CodeMirror {
     height: calc(100vh - 100px) !important;
+}
+
+.markdown-output {
+    display: none;
+    height: calc(100vh - 100px);
+    overflow-y: auto;
+    background-color: #1c1b22;
+    color: #b1b1b3;
+    border: 1px solid #38383d;
+    border-radius: 3px;
+    padding: 10px;
+    font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.markdown-output pre, .markdown-output code {
+    background-color: #2a2a2e;
+    border: 1px solid #38383d;
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+}
+
+.markdown-output pre {
+    padding: 10px;
+    overflow-x: auto;
+}
+
+.markdown-output h1, .markdown-output h2, .markdown-output h3, 
+.markdown-output h4, .markdown-output h5, .markdown-output h6 {
+    color: #75bfff;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.markdown-output a {
+    color: #45a1ff;
+    text-decoration: none;
+}
+
+.markdown-output a:hover {
+    text-decoration: underline;
+}
+
+.markdown-output blockquote {
+    border-left: 3px solid #38383d;
+    margin-left: 0;
+    padding-left: 10px;
+    color: #737373;
+}
+
+.markdown-output table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 10px 0;
+}
+
+.markdown-output th, .markdown-output td {
+    border: 1px solid #38383d;
+    padding: 8px;
+    text-align: left;
+}
+
+.markdown-output th {
+    background-color: #2a2a2e;
+}
+
+.markdown-output ul, .markdown-output ol {
+    padding-left: 20px;
 }
 
 /* CodeMirror ShadowFox theme overrides - ensuring our styles take precedence */
