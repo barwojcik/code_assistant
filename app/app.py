@@ -4,6 +4,7 @@ Code Assistant
 import requests
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
+from generator import OllamaCodeGenerator
 
 # Initialize Flask app and CORS
 app = Flask(__name__)
@@ -15,6 +16,7 @@ app.logger.setLevel(cfg['LOG_LEVEL'])
 
 OLLAMA_URL = 'http://localhost:11434/api/generate'
 OLLAMA_MODEL = 'llama3.2:1b'
+code_generator = OllamaCodeGenerator(OLLAMA_URL, OLLAMA_MODEL)
 
 # Define the route for the index page
 @app.route('/', methods=['GET'])
@@ -42,17 +44,8 @@ def process_instruction_route():
         user_code = request.json['userCode']
         app.logger.info('User instruction: %s for code: %s', user_instruction, user_code)
 
-        response = requests.post(
-            OLLAMA_URL,
-            json={
-                'prompt': f'Based on this instruction: {user_instruction} and provided python code: {user_code}. Generate a python code.',
-                'model': OLLAMA_MODEL,
-                'stream': False,
-            },
-        )
-        app.logger.info('Response from a server: %s', response.json())
-        response_text = response.json()['response']
-        output_code = response_text.split("```python\n")[1].split("```")[0]
+        # Generate Python code
+        output_code = code_generator.generate_code(user_instruction, user_code)
 
         # Return response as JSON
         return jsonify({
