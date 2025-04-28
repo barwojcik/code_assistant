@@ -14,14 +14,13 @@ app.config.from_object('config')
 cfg = app.config
 app.logger.setLevel(cfg['LOG_LEVEL'])
 
-OLLAMA_URL = 'http://localhost:11434/api/generate'
-OLLAMA_MODEL = 'llama3.2:1b'
-code_generator = OllamaCodeGenerator(OLLAMA_URL, OLLAMA_MODEL)
+code_generator = OllamaCodeGenerator.from_config(cfg['OLLAMA'])
 
 # Define the route for the index page
 @app.route('/', methods=['GET'])
 def index() -> str:
     """Render the index page for the application."""
+    app.logger.info('Rendering index page')
     return render_template('index.html')  # Render the index.html template
 
 # Define the route for processing instructions
@@ -46,6 +45,7 @@ def process_instruction_route():
 
         # Generate Python code
         output_code = code_generator.generate_code(user_instruction, user_code)
+        app.logger.info('Output code: %s', output_code)
 
         # Return response as JSON
         return jsonify({
