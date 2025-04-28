@@ -232,13 +232,19 @@ button:active {
     background-color: #2a2a2e;
     border: 1px solid #38383d;
     border-radius: 3px;
-    padding: 2px 4px;
     font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+    margin: 0;
 }
 
 .markdown-output pre {
-    padding: 10px;
+    padding: 8px;
     overflow-x: auto;
+}
+
+.markdown-output pre code {
+    padding: 0;
+    border: none;
+    background-color: transparent;
 }
 
 .markdown-output h1, .markdown-output h2, .markdown-output h3, 
