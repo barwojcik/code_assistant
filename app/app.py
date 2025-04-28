@@ -2,8 +2,11 @@
 Code Assistant
 """
 import requests
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 from flask_cors import CORS
+from dataclasses import asdict
+
+from history import HistoryHandler, HistoryEntry
 from generator import OllamaCodeGenerator
 
 # Initialize Flask app and CORS
@@ -15,6 +18,7 @@ cfg = app.config
 app.logger.setLevel(cfg['LOG_LEVEL'])
 
 code_generator = OllamaCodeGenerator.from_config(cfg['OLLAMA'])
+history = HistoryHandler()
 
 # Define the route for the index page
 @app.route('/', methods=['GET'])
@@ -27,15 +31,15 @@ def index() -> str:
 @app.route('/process-instruction', methods=['POST'])
 def process_instruction_route():
     """
-        Process an instruction by generating Python code based on user input.
+    Process an instruction by generating Python code based on user input.
 
-        This function takes in two JSON parameters:
-            - 'userInstruction': The text of the instruction provided by the user.
-            - 'userCode': A snippet of Python code that is expected to be used as input for this process.
+    This function takes in two JSON parameters:
+        - 'userInstruction': The text of the instruction provided by the user.
+        - 'userCode': A snippet of Python code that is expected to be used as input for this process.
 
-        It then sends a POST request to an OLLAMA model endpoint with the instructions and generates a response
-        from the server. The response is the generated Python code followed by any additional context or feedback
-        from the server.
+    It then sends a POST request to an OLLAMA model endpoint with the instructions and generates a response
+    from the server. The response is the generated Python code followed by any additional context or feedback
+    from the server.
     """
     try:
         # Extract the user's inputs
@@ -46,6 +50,11 @@ def process_instruction_route():
         # Generate Python code
         response_text, output_code = code_generator.generate_code(user_instruction, user_code)
         app.logger.info('Output code: %s', output_code)
+
+        # Add a new entry to history
+        history_entry: HistoryEntry = HistoryEntry(user_instruction, user_code, output_code, response_text)
+        history.add_new_entry(history_entry)
+        app.logger.info('Added to the history: %s', history_entry)
 
         # Return response as JSON
         return jsonify({
@@ -60,6 +69,24 @@ def process_instruction_route():
     except Exception as e:
         app.logger.error('Error processing message: %s', e)
         return jsonify({'error': 'Failed to process message.'}), 500
+
+
+@app.route('/get-history', methods=['GET'])
+def get_history_endpoint() -> tuple[Response, int]:
+    """
+    API endpoint to retrieve the history entries.
+
+    Returns:
+        flask.Response: JSON response containing the list of history entries
+    """
+    try:
+        history_entries: list[HistoryEntry] = history.get_history()
+        # Convert dataclass objects to dictionaries for JSON serialization
+        history_data = [asdict(entry) for entry in history_entries]
+        return jsonify({"success": True, "history": history_data}), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 
 # Run the Flask app
 if __name__ == "__main__":
