@@ -1,3 +1,6 @@
+"""
+Module containing functions to manage and store history.
+"""
 from dataclasses import dataclass, field
 from typing import List, Dict
 from collections import deque
@@ -20,12 +23,16 @@ class HistoryHandler:
 
     Attributes:
         max_length (int): Maximum length of the history. Defaults to 10.
+
+    Methods:
+        add_new_entry: Adds a new entry to the history.
+        get_history: Returns a list of all history entries.
     """
 
-    def __init__(self, max_length=10):
+    def __init__(self, max_length: int = 10) -> None:
         """Initializes a new instance of the HistoryHandler."""
-        self.history_max_length = max_length
-        self._history = deque([], self.history_max_length)
+        self._history_max_length: int = max_length
+        self._history = deque([], self._history_max_length)
 
     def add_new_entry(self, entry: HistoryEntry) -> None:
         """

@@ -11,7 +11,7 @@ print(output_code)
 """
 import logging
 from typing import Any, Optional, Callable
-from ollama import Client, GenerateResponse
+from ollama import Client, GenerateResponse, ListResponse
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +22,6 @@ class OllamaCodeGenerator:
 
     This class uses Ollama to generate Python code based on user instructions.
 
-    Attributes:
-        ollama_model (str): Name of the Ollama model to use for code generation.
-        _client (Client): Ollama client instance.
-        generate_kwargs (dict[str, Any]): Additional keyword arguments to pass to the generate() method.
-
     Args:
         ollama_model (str): Name of the Ollama model to use for code generation.
         ollama_host (Optional[str]): Hostname of the Ollama server. Defaults to None.
@@ -35,18 +30,18 @@ class OllamaCodeGenerator:
         generate_kwargs (Optional[dict[str, Any]]): Additional keyword arguments to pass to the generate() method.
 
     Methods:
-        from_config(cls, generator_config: dict[str, Any]): Create a new instance of OllamaCodeGenerator
+        from_config: Create a new instance of OllamaCodeGenerator
             from a configuration dictionary.
-        _get_prompt(user_instruction:str, user_code: str): Generate a prompt for code generation.
-        generate_code(self, user_instruction: str, user_code: Optional[str] = None): Generates a Python code
+        generate_code: Generates a Python code
+        check_availability: Check if the Ollama service is available.
     """
     def __init__(
             self,
             ollama_model: str,
             ollama_host: Optional[str] = None,
-            prompt_function: Optional[Callable] = None,
+            prompt_function: Optional[Callable[[str, str], str]] = None,
             generate_kwargs: Optional[dict[str, Any]] = None,
-    ):
+    ) -> None:
         """
         Initialize the OllamaCodeGenerator class.
 
@@ -58,11 +53,11 @@ class OllamaCodeGenerator:
             generate_kwargs (Optional[dict[str, Any]]): Additional keyword arguments to pass to the generate() method.
         """
         logger.info('Initializing OllamaCodeGenerator with model: %s', ollama_model)
-        self.ollama_model: str = ollama_model
+        self._ollama_model: str = ollama_model
         self._client: Client = Client(host=ollama_host)
         if prompt_function:
-            self._get_prompt = prompt_function
-        self.generate_kwargs: dict = (generate_kwargs or dict())
+            self._get_prompt: Callable[[str, str], str] = prompt_function
+        self._generate_kwargs: dict = (generate_kwargs or dict())
 
     @classmethod
     def from_config(cls, generator_config: dict[str, Any]) -> "OllamaCodeGenerator":
@@ -120,16 +115,11 @@ class OllamaCodeGenerator:
 
         if "```python\n" in output_code:
             output_code = output_code.split("```python\n")[1].split("```")[0]
-            if output_code.endswith("\n"):
-                output_code = output_code[:-1]
         else:
             output_code = output_code.split("```")[1].split("```")[0]
 
         if output_code.startswith("\n"):
             output_code = output_code[1:]
-
-        if output_code.endswith("\n"):
-            output_code = output_code[:-1]
 
         return output_code
 
@@ -150,10 +140,10 @@ class OllamaCodeGenerator:
         """
         user_code = (user_code or "(no code provided)")
         ollama_response: GenerateResponse = self._client.generate(
-            model=self.ollama_model,
+            model=self._ollama_model,
             prompt=self._get_prompt(user_instruction, user_code),
             stream=False,
-            **self.generate_kwargs,
+            **self._generate_kwargs,
         )
         logger.debug('Ollama response: %s', ollama_response)
 
@@ -164,3 +154,15 @@ class OllamaCodeGenerator:
         logger.debug('Generated code: %s', output_code)
 
         return response_text, output_code
+
+    def check_availability(self) -> ListResponse:
+        """
+        Check if the Ollama service is available.
+
+        Returns:
+            ListResponse: Response from the Ollama service.
+
+        Raises:
+            Exception: If the service is not available
+        """
+        return self._client.list()
