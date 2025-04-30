@@ -6,9 +6,6 @@ It also includes helper functions to manage history entries.
 
 Classes:
     CodeAssistantApp: Initializes the Code Assistant application.
-
-Functions:
-    main: Runs the Flask application.
 """
 from flask import Flask, render_template, request, jsonify, Response
 from flask_cors import CORS

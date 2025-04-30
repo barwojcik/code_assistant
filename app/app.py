@@ -6,6 +6,9 @@ It then invokes the `create_app` method on the instance to set up
 the application. Finally, it starts the application by calling
 the `run` method on the instance. This function serves as the
 starting point for the entire application lifecycle.
+
+Functions:
+    main: Runs the Flask application.
 """
 from code_assistant import CodeAssistantApp
 
