@@ -161,6 +161,9 @@ class CodeAssistantApp:
         except KeyError as e:
             self.app.logger.error('Missing key in request data: %s', e)
             return jsonify({'error': f'Missing required field: {str(e)}'}), 400
+        except ConnectionError as e:
+            self.app.logger.error('Connection error: %s', e)
+            return jsonify({'error': 'Ollama service is not available'}), 503
         except Exception as e:
             self.app.logger.error('Error processing message: %s', e)
             return jsonify({'error': 'Internal server error'}), 500
