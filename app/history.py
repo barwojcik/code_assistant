@@ -1,10 +1,13 @@
 """
 Module containing functions to manage and store history.
 """
+import logging
 from dataclasses import dataclass, field
 from typing import List, Dict
 from collections import deque
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -33,6 +36,7 @@ class HistoryHandler:
         """Initializes a new instance of the HistoryHandler."""
         self._history_max_length: int = max_length
         self._history = deque([], self._history_max_length)
+        logger.info('Initialized HistoryHandler with max length: %d', self._history_max_length)
 
     def add_new_entry(self, entry: HistoryEntry) -> None:
         """
@@ -43,6 +47,7 @@ class HistoryHandler:
         """
         # Add the new entry to the history
         self._history.append(entry)
+        logger.info('Added new history entry: %s', entry)
 
     def get_history(self) -> List[HistoryEntry]:
         """Returns a list of all history entries."""

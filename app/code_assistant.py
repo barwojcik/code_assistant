@@ -38,9 +38,6 @@ class CodeAssistantApp:
 
         Returns:
             Flask application instance.
-
-        Raises:
-            ValueError: If required configuration values are missing.
         """
         self.app = Flask(__name__)
         CORS(self.app, resources={r"/*": {"origins": "*"}})
@@ -48,21 +45,19 @@ class CodeAssistantApp:
         self.app.config.from_object('config')
         cfg = self.app.config
 
-        # Validate required configuration
-        required_config = ['LOG_LEVEL', 'OLLAMA', 'MAX_HISTORY_LENGTH']
-        missing_config = [key for key in required_config if key not in cfg]
-        if missing_config:
-            raise ValueError(f"Missing required configuration keys: {', '.join(missing_config)}")
+        if 'LOG_LEVEL' in cfg.keys():
+            self.app.logger.setLevel(cfg['LOG_LEVEL'])
+        self.app.logger.info('Initialized Flask application')
 
-        # Validate OLLAMA configuration
-        if not isinstance(cfg.get('OLLAMA'), dict) or 'ollama_model' not in cfg.get('OLLAMA', {}):
-            raise ValueError("Invalid OLLAMA configuration: missing ollama_model")
+        if 'OLLAMA' in cfg.keys():
+            self.code_generator = OllamaCodeGenerator.from_config(cfg['OLLAMA'])
+        else:
+            self.code_generator = OllamaCodeGenerator()
 
-        self.app.logger.setLevel(cfg['LOG_LEVEL'])
-
-        # Initialize services
-        self.code_generator = OllamaCodeGenerator.from_config(cfg['OLLAMA'])
-        self.history = HistoryHandler(max_length=cfg['MAX_HISTORY_LENGTH'])
+        if 'MAX_HISTORY_LENGTH' in cfg.keys():
+            self.history = HistoryHandler(max_length=cfg['MAX_HISTORY_LENGTH'])
+        else:
+            self.history = HistoryHandler()
 
         self._init_routes()
         return self.app
@@ -81,6 +76,7 @@ class CodeAssistantApp:
             view_func=self._index,
             methods=['GET'],
         )
+        self.app.logger.info('Initialized routes for main page')
 
         # API routes
         self.app.add_url_rule(
@@ -89,6 +85,7 @@ class CodeAssistantApp:
             view_func=self._process_instruction,
             methods=['POST'],
         )
+        self.app.logger.info('Initialized route for processing instructions')
 
         self.app.add_url_rule(
             '/get-history',
@@ -96,6 +93,7 @@ class CodeAssistantApp:
             view_func=self._get_history,
             methods=['GET'],
         )
+        self.app.logger.info('Initialized route for retrieving history')
 
         # Health check endpoint for monitoring
         self.app.add_url_rule(
@@ -104,6 +102,7 @@ class CodeAssistantApp:
             view_func=self._health_check,
             methods=['GET'],
         )
+        self.app.logger.info('Initialized route for health check')
 
     def _index(self) -> str:
         """
@@ -152,6 +151,7 @@ class CodeAssistantApp:
             history_entry = HistoryEntry(
                 user_instruction, user_code, output_code, response_text)
             self.history.add_new_entry(history_entry)
+            self.app.logger.info('Added new history entry')
 
             return jsonify({
                 'output': output_code,
@@ -188,10 +188,7 @@ class CodeAssistantApp:
         Returns:
             tuple[Response, int]: JSON response with service status and HTTP status code
         """
-        try:
-            # Check if Ollama service is available
-            _ = self.code_generator.check_availability()
-
+        if self.code_generator.is_service_available():
             return jsonify({
                 "status": "healthy",
                 "services": {
@@ -199,14 +196,13 @@ class CodeAssistantApp:
                 },
                 "version": "1.0.0"
             }), 200
-        except Exception as e:
-            self.app.logger.error('Health check failed: %s', e)
+        else:
             return jsonify({
                 "status": "degraded",
                 "services": {
-                    "ollama": "down" if "ollama" in str(e).lower() else "unknown",
+                    "ollama": "down"
                 },
-                "error": str(e)
+                "error": "Ollama service is not available"
             }), 503
 
     def run(self, **kwargs):
@@ -222,3 +218,4 @@ class CodeAssistantApp:
         if not self.app:
             raise RuntimeError("Application not initialized. Call create_app() first.")
         self.app.run(**kwargs)
+        self.app.logger.info('Application running')

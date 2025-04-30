@@ -23,7 +23,7 @@ class OllamaCodeGenerator:
     This class uses Ollama to generate Python code based on user instructions.
 
     Args:
-        ollama_model (str): Name of the Ollama model to use for code generation.
+        ollama_model (str): Name of the Ollama model to use for code generation. Defdefaults to 'llama3.2:1b'.
         ollama_host (Optional[str]): Hostname of the Ollama server. Defaults to None.
         prompt_function (Optional[Callable]): Function to use for generating prompts, it overrides the default.
             Must accept two arguments: user_instruction (str) and user_code (str) and return str. Defaults to None.
@@ -37,7 +37,7 @@ class OllamaCodeGenerator:
     """
     def __init__(
             self,
-            ollama_model: str,
+            ollama_model: Optional[str] = None,
             ollama_host: Optional[str] = None,
             prompt_function: Optional[Callable[[str, str], str]] = None,
             generate_kwargs: Optional[dict[str, Any]] = None,
@@ -53,6 +53,9 @@ class OllamaCodeGenerator:
             generate_kwargs (Optional[dict[str, Any]]): Additional keyword arguments to pass to the generate() method.
         """
         logger.info('Initializing OllamaCodeGenerator with model: %s', ollama_model)
+        self._default_ollama_model: str = 'llama3.2:1b'
+        if not ollama_model:
+            ollama_model = self._default_ollama_model
         self._ollama_model: str = ollama_model
         self._client: Client = Client(host=ollama_host)
         if prompt_function:
@@ -65,21 +68,12 @@ class OllamaCodeGenerator:
 
         Args:
             generator_config (dict[str, Any]): Configuration dictionary containing model name and other options.
-                Must contain 'ollama_model' key.
 
         Returns:
             OllamaCodeGenerator: New instance of OllamaCodeGenerator.
-
-        Raises:
-            KeyError: If 'ollama_model' key is missing from the configuration dictionary.
         """
         config: dict[str, Any] = generator_config.copy()
-
-        if 'ollama_model' not in config.keys():
-            raise KeyError("Missing required 'ollama_model' key in configuration")
-
-        model_id: str = config.pop('ollama_model')
-        return cls(model_id, **config)
+        return cls(**config)
 
     @staticmethod
     def _get_prompt(user_instruction:str, user_code: str) -> str:
@@ -155,14 +149,54 @@ class OllamaCodeGenerator:
 
         return response_text, output_code
 
-    def check_availability(self) -> ListResponse:
+    def _get_available_models(self) -> ListResponse:
+        """
+
+        """
+        return self._client.list()
+
+    def get_available_model_names(self) -> list[str]:
+        available_models: ListResponse = self._get_available_models()
+        available_model_names: list[str] = [model.model for model in available_models.models]
+        return available_model_names
+
+    def is_service_available(self) -> bool:
         """
         Check if the Ollama service is available.
 
         Returns:
-            ListResponse: Response from the Ollama service.
-
-        Raises:
-            Exception: If the service is not available
+            bool: True if the service is available, False otherwise.
         """
-        return self._client.list()
+        try:
+            _ = self._get_available_models()
+        except ConnectionError as e:
+            logger.error('Ollama connection error: %s', e)
+            return False
+        except Exception as e:
+            logger.error('Ollama service is not available: %s', e)
+            return False
+
+        return True
+
+    def is_model_available(self, model_name: str) -> bool:
+        available_model_names: list[str] = self.get_available_model_names()
+        if model_name not in available_model_names:
+            logger.warning('Model %s not found in available models %s', model_name, available_model_names)
+            logger.warning('Attempting to pull model %s from remote repository', model_name)
+            try:
+                self._client.pull(model_name)
+                logger.info('Model %s successfully pulled from remote repository', model_name)
+            except Exception as e:
+                logger.error('Failed to pull model %s from remote repository: %s', model_name, e)
+                return False
+
+        logger.info('Model %s found in available models %s', model_name, available_model_names)
+        return True
+
+    def set_model(self, model_name: str) -> bool:
+        if not self.is_model_available(model_name):
+            return False
+
+        self._ollama_model = model_name
+        logger.info('Model set to %s', model_name)
+        return True
