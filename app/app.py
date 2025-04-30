@@ -26,6 +26,7 @@ def main():
     Returns:
         None
     """
+
     app = CodeAssistantApp()
     app.create_app()
     app.run()

@@ -1,6 +1,7 @@
 """
 Module containing functions to manage and store history.
 """
+
 import logging
 from dataclasses import dataclass, field
 from typing import List, Deque
@@ -13,7 +14,13 @@ logger = logging.getLogger(__name__)
 @dataclass
 class HistoryEntry:
     """
-    Represents a single entry in the history.
+    Represents an entry in the history log.
+
+    The `HistoryEntry` class is used to store details about a single entry in the
+    history log, including the corresponding instructions, code, generated output
+    code, raw response from a relevant process, and the timestamp at which the
+    entry was created. This can be helpful in cases where tracking historical
+    records of generated code or transformations is needed.
 
     Attributes:
         instructions: User's input instructions
@@ -32,10 +39,11 @@ class HistoryEntry:
 
 class HistoryHandler:
     """
-    Manages and stores history entries in a circular buffer.
+    Handles a collection of history entries with a fixed maximum length.
 
-    The handler maintains a fixed-size collection of history entries,
-    automatically removing oldest entries when the maximum size is reached.
+    This class is designed to maintain a collection of history entries up to a predefined or user-specified maximum
+    length. When the maximum limit is reached, the oldest entry is automatically removed as new entries are added.
+    It also provides methods for adding new history entries and retrieving the current list of history entries.
 
     Attributes:
         history_max_length (int): Maximum length of the history. Defaults to 10.

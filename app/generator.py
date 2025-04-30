@@ -9,6 +9,7 @@ output_code = generator.generate_code(user_instruction='Write a function to calc
                                       user_code='def circle_area(radius):')
 print(output_code)
 """
+
 import logging
 from typing import Any, Optional, Callable
 from ollama import Client, GenerateResponse, ListResponse

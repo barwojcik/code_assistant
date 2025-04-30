@@ -7,12 +7,16 @@ It also includes helper functions to manage history entries.
 Classes:
     CodeAssistantApp: Initializes the Code Assistant application.
 """
+
+from dataclasses import asdict
+from typing import Optional
 from flask import Flask, render_template, request, jsonify, Response
 from flask_cors import CORS
 from dataclasses import asdict
 from typing import Optional
 from history import HistoryHandler, HistoryEntry
 from generator import OllamaCodeGenerator
+
 
 class CodeAssistantApp:
     """
@@ -27,6 +31,7 @@ class CodeAssistantApp:
         create_app: Initializes and configures the Flask application.
         run: Runs the Flask application.
     """
+
     def __init__(self) -> None:
         self.app: Optional[Flask] = None
         self.code_generator: Optional[OllamaCodeGenerator] = None
@@ -199,14 +204,14 @@ class CodeAssistantApp:
                 },
                 "version": "1.0.0"
             }), 200
-        else:
-            return jsonify({
-                "status": "degraded",
-                "services": {
-                    "ollama": "down"
-                },
-                "error": "Ollama service is not available"
-            }), 503
+
+        return jsonify({
+            "status": "degraded",
+            "services": {
+                "ollama": "down"
+            },
+            "error": "Ollama service is not available"
+        }), 503
 
     def run(self, **kwargs):
         """
