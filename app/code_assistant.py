@@ -55,7 +55,7 @@ class CodeAssistantApp:
             self.code_generator = OllamaCodeGenerator()
 
         if 'MAX_HISTORY_LENGTH' in cfg.keys():
-            self.history = HistoryHandler(max_length=cfg['MAX_HISTORY_LENGTH'])
+            self.history = HistoryHandler(max_history_length=cfg['MAX_HISTORY_LENGTH'])
         else:
             self.history = HistoryHandler()
 

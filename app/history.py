@@ -47,22 +47,22 @@ class HistoryHandler:
 
     DEFAULT_MAX_LENGTH: int = 10
 
-    def __init__(self, history_max_length: int = DEFAULT_MAX_LENGTH) -> None:
+    def __init__(self, max_history_length: int = DEFAULT_MAX_LENGTH) -> None:
         """
         Initialize a new HistoryHandler instance.
 
         Args:
-            history_max_length: Maximum number of entries to store. Must be greater than 0.
+            max_history_length: Maximum number of entries to store. Must be greater than 0.
         """
-        if history_max_length <= 0:
+        if max_history_length <= 0:
             logger.warning(
                 'Invalid max_length: %d, using default value: %d',
-                history_max_length,
+                max_history_length,
                 self.DEFAULT_MAX_LENGTH,
             )
-            history_max_length = self.DEFAULT_MAX_LENGTH
+            max_history_length = self.DEFAULT_MAX_LENGTH
 
-        self._history_max_length: int = history_max_length
+        self._history_max_length: int = max_history_length
         self._history: Deque[HistoryEntry] = deque([], self._history_max_length)
         logger.info('Initialized HistoryHandler with max length: %d', self._history_max_length)
 
