@@ -83,7 +83,7 @@ class CodeAssistantApp:
 
         # API routes
         self.app.add_url_rule(
-            '/process-instruction',
+            '/api/v1/instructions',
             endpoint='process_instruction',
             view_func=self._process_instruction,
             methods=['POST'],
@@ -91,7 +91,14 @@ class CodeAssistantApp:
         self.app.logger.info('Initialized route for processing instructions')
 
         self.app.add_url_rule(
-            '/get-history',
+            '/api/v1/model',
+            endpoint='process_set_model',
+            view_func=self._process_model,
+            methods=['GET', 'POST'],
+        )
+
+        self.app.add_url_rule(
+            '/api/v1/history',
             endpoint='get_history',
             view_func=self._get_history,
             methods=['GET'],
@@ -100,7 +107,7 @@ class CodeAssistantApp:
 
         # Health check endpoint for monitoring
         self.app.add_url_rule(
-            '/health',
+            '/api/v1/health',
             endpoint='health_check',
             view_func=self._health_check,
             methods=['GET'],
@@ -167,6 +174,62 @@ class CodeAssistantApp:
         except ConnectionError as e:
             self.app.logger.error('Connection error: %s', e)
             return jsonify({'error': 'Ollama service is not available'}), 503
+        except Exception as e:
+            self.app.logger.error('Error processing message: %s', e)
+            return jsonify({'error': 'Internal server error'}), 500
+
+    def _process_model(self) -> tuple[Response, int]:
+        """
+        Processes a model based on the HTTP request method.
+
+        Returns:
+            tuple[Response, int]: A tuple containing a `Response` object and an integer indicating
+                the HTTP status code.
+        """
+        if request.method == 'GET':
+            return self._process_get_model()
+
+        return self._process_set_model()
+
+    def _process_get_model(self) -> tuple[Response, int]:
+        """
+        Processes a request to retrieve information about the available models and
+        the currently active model being used by the code generator.
+
+        Returns:
+            tuple[Response, int]: A tuple containing a JSON response and the corresponding HTTP status
+                code. The successful response includes the available model names and the
+                actively selected model.
+        """
+        try:
+            return jsonify(
+                {
+                    "available_models": self.code_generator.get_available_model_names(),
+                    "current_model": self.code_generator.get_current_model_name(),
+                }
+            ), 200
+        except Exception as e:
+            self.app.logger.error('Error processing message: %s', e)
+            return jsonify({'error': 'Internal server error'}), 500
+
+    def _process_set_model(self) -> tuple[Response, int]:
+        """
+        Sets the model name based on the input JSON request and updates the
+        application's state accordingly.
+
+        Returns:
+            tuple[Response, int]: A tuple containing a ``Response`` object and an integer status code.
+        """
+        try:
+            model_name = request.json['model']
+            self.app.logger.info('Setting model to %s', model_name)
+            if self.code_generator.set_model(model_name):
+                return jsonify({"success": True}), 200
+            else:
+                return jsonify({"success": False, "error": "Invalid model name"}), 400
+        except KeyError as e:
+            self.app.logger.error('Missing key in request data: %s', e)
+            return jsonify({'error': f'Missing required field: {str(e)}'}), 400
         except Exception as e:
             self.app.logger.error('Error processing message: %s', e)
             return jsonify({'error': 'Internal server error'}), 500

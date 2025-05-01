@@ -211,6 +211,15 @@ class OllamaCodeGenerator:
         available_model_names: list[str] = [model.model for model in available_models.models]
         return available_model_names
 
+    def get_current_model_name(self) -> str:
+        """
+        Retrieves the name of the current model.
+
+        Returns:
+            str: The name of the current model.
+        """
+        return self._ollama_model
+
     def is_service_available(self) -> bool:
         """
         Check if the Ollama service is available.

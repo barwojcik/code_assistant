@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to fetch history data from server
     async function fetchHistoryData() {
         try {
-            const response = await fetch('/get-history');
+            const response = await fetch('/api/v1/history');
             if (!response.ok) {
                 throw new Error(`Server responded with status: ${response.status}`);
             }
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
             sendButton.disabled = true;
             
             // Send data to the backend
-            const response = await fetch('/process-instruction', {
+            const response = await fetch('/api/v1/instructions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
