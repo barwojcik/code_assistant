@@ -24,7 +24,7 @@ class OllamaCodeGenerator:
     This class uses Ollama to generate Python code based on user instructions.
 
     Args:
-        ollama_model (str): Name of the Ollama model to use for code generation. Defdefaults to 'llama3.2:1b'.
+        ollama_model (str): Name of the Ollama model to use for code generation. Defaults to 'llama3.2:1b'.
         ollama_host (Optional[str]): Hostname of the Ollama server. Defaults to None.
         prompt_function (Optional[Callable]): Function to use for generating prompts, it overrides the default.
             Must accept two arguments: user_instruction (str) and user_code (str) and return str. Defaults to None.
@@ -37,9 +37,9 @@ class OllamaCodeGenerator:
         check_availability: Check if the Ollama service is available.
     """
 
-    DEFAULT_MODEL = 'llama3.2:1b'
-    PYTHON_START_TOKEN = '```python\n'
-    CODE_TOKEN = '```'
+    DEFAULT_MODEL: str = 'llama3.2:1b'
+    PYTHON_START_TOKEN: str = '```python\n'
+    CODE_TOKEN: str = '```'
 
     def __init__(
             self,
@@ -60,26 +60,30 @@ class OllamaCodeGenerator:
         """
         self._default_ollama_model: str = self.DEFAULT_MODEL
         if not ollama_model:
-            ollama_model = self._default_ollama_model
+            ollama_model = self.DEFAULT_MODEL
         logger.info('Initializing OllamaCodeGenerator with model: %s', ollama_model)
         self._ollama_model: str = ollama_model
         self._is_model_initialized: bool = False
         self._client: Client = Client(host=ollama_host)
-        if prompt_function:
-            self._get_prompt: Callable[[str, str], str] = prompt_function
+        self._custom_prompt_fn: Optional[Callable[[str, str], str]] = prompt_function
         self._generate_kwargs: dict = (generate_kwargs or dict())
 
         if self.is_service_available():
-            self._init_model()
+            self._is_model_initialized = self._init_model()
 
-    def _init_model(self):
+    def _init_model(self) -> bool:
         if self.is_model_available(self._ollama_model):
-            self._is_model_initialized = True
-        elif self._ollama_model != self._default_ollama_model:
-            logger.warning('Falling back to default model %s', self._default_ollama_model)
-            if self.is_model_available(self._default_ollama_model):
-                self._ollama_model = self._default_ollama_model
-                self._is_model_initialized = True
+            return True
+
+        if self._ollama_model == self.DEFAULT_MODEL:
+            return False
+
+        logger.warning('Falling back to default model %s', self.DEFAULT_MODEL)
+        if self.is_model_available(self.DEFAULT_MODEL):
+            self._ollama_model = self.DEFAULT_MODEL
+            return True
+
+        return False
 
     @classmethod
     def from_config(cls, generator_config: dict[str, Any]) -> "OllamaCodeGenerator":
@@ -95,7 +99,7 @@ class OllamaCodeGenerator:
         return cls(**config)
 
     @staticmethod
-    def _get_prompt(user_instruction:str, user_code: str) -> str:
+    def _default_prompt_fn(user_instruction:str, user_code: str) -> str:
         """
         Generate a prompt for code generation.
 
@@ -110,6 +114,26 @@ class OllamaCodeGenerator:
             f'Based on this instructions:\n{user_instruction}\n and provided python code:\n'
             f'{user_code}\n generate python code.'
         )
+
+    def _get_prompt(self, user_instruction: str, user_code: str) -> str:
+        """
+        Generate a prompt for code generation.
+
+        Args:
+            user_instruction (str): Instructions to generate code from.
+            user_code (str): Code to use as input.
+
+        Returns:
+            str: Prompt to use for generating code.
+        """
+        if self._custom_prompt_fn:
+            try:
+                return self._custom_prompt_fn(user_instruction, user_code)
+            except Exception as e:
+                logger.error('Error in custom prompt function: %s', e)
+                logger.error('Falling back to default prompt')
+
+        return self._default_prompt_fn(user_instruction, user_code)
 
     def _extract_code(self, response_text: str) -> str:
         """

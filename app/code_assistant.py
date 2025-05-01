@@ -12,8 +12,6 @@ from dataclasses import asdict
 from typing import Optional
 from flask import Flask, render_template, request, jsonify, Response
 from flask_cors import CORS
-from dataclasses import asdict
-from typing import Optional
 from history import HistoryHandler, HistoryEntry
 from generator import OllamaCodeGenerator
 
