@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Object to store model data from server
     let modelData = {
-        availableModels: [],
+        availableModels: ['Add a model'],
         currentModel: null
     };
     
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to update the model selector dropdown
     function updateModelSelector() {
         const modelSelect = document.getElementById('modelSelect');
-        
+
         // Clear existing options
         modelSelect.innerHTML = '';
         
@@ -213,7 +213,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Apply feedback to buttons
-    applyFeedbackToButtons(['sendButton', 'resetButton', 'addModelButton']);
+    applyFeedbackToButtons(['sendButton', 'resetButton', 'addModelButton', 'copyButton', 'copyToInputButton']);
+
+    // Fill model selector with placeholder
+    updateModelSelector();
     
     // Fetch model data when page loads
     fetchModelData();
