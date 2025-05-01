@@ -6,6 +6,218 @@ document.addEventListener('DOMContentLoaded', function() {
     // Object to store history data from server
     let historyData = {};
     
+    // Object to store model data from server
+    let modelData = {
+        availableModels: [],
+        currentModel: null
+    };
+    
+    // Function to fetch model data from server
+    async function fetchModelData() {
+        try {
+            const response = await fetch('/api/v1/model');
+            if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            modelData.availableModels = data.available_models || [];
+            modelData.currentModel = data.current_model || '';
+            
+            // Update model selection dropdown
+            updateModelSelector();
+        } catch (error) {
+            console.error('Error fetching model data:', error);
+        }
+    }
+    
+    // Function to update the model selector dropdown
+    function updateModelSelector() {
+        const modelSelect = document.getElementById('modelSelect');
+        
+        // Clear existing options
+        modelSelect.innerHTML = '';
+        
+        // Add options for each available model
+        modelData.availableModels.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model;
+            option.textContent = model;
+            if (model === modelData.currentModel) {
+                option.selected = true;
+            }
+            modelSelect.appendChild(option);
+        });
+    }
+    
+    // Function to set the current model
+    async function setCurrentModel(modelName) {
+        try {
+            const response = await fetch('/api/v1/model', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model: modelName
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            if (data.success) {
+                modelData.currentModel = modelName;
+                console.log(`Model successfully set to: ${modelName}`);
+                    return true; // Return success status
+                } else {
+                    const errorMsg = data.error || 'Unknown error';
+                    console.error(`Failed to set model: ${errorMsg}`);
+                    throw new Error(errorMsg);
+                }
+            } catch (error) {
+                console.error('Error setting model:', error);
+                throw error; // Re-throw to allow caller to handle
+        }
+    }
+    
+    // Add event listener for model selection changes
+    document.getElementById('modelSelect').addEventListener('change', function() {
+        const selectedModel = this.value;
+        if (selectedModel && selectedModel !== modelData.currentModel) {
+            setCurrentModel(selectedModel);
+        }
+    });
+    
+    // Modal elements
+    const addModelModal = document.getElementById('addModelModal');
+    const newModelNameInput = document.getElementById('newModelName');
+    const modelNameError = document.getElementById('modelNameError');
+    const confirmAddModelButton = document.getElementById('confirmAddModel');
+    const cancelAddModelButton = document.getElementById('cancelAddModel');
+    const closeModalButton = document.getElementById('closeModalButton');
+    
+    // Function to show the modal
+    function showAddModelModal() {
+        // Clear any previous input and errors
+        newModelNameInput.value = '';
+        modelNameError.textContent = '';
+        
+        // Show the modal
+        addModelModal.classList.add('visible');
+        
+        // Focus the input field
+        setTimeout(() => {
+            newModelNameInput.focus();
+        }, 100);
+    }
+    
+    // Function to hide the modal
+    function hideAddModelModal() {
+        addModelModal.classList.remove('visible');
+    }
+    
+    // Function to handle model addition
+    async function handleAddModel() {
+        const modelName = newModelNameInput.value.trim();
+        
+        // Validate input
+        if (!modelName) {
+            modelNameError.textContent = 'Please enter a model name';
+            return;
+        }
+        
+        // Reset error message
+        modelNameError.textContent = '';
+        
+        // Disable confirm button and show loading state
+        confirmAddModelButton.disabled = true;
+        const originalButtonText = confirmAddModelButton.innerHTML;
+        confirmAddModelButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+        
+        try {
+            // Try to set the new model
+            await setCurrentModel(modelName);
+            
+            // If successful, refresh model list and hide modal
+            await fetchModelData();
+            hideAddModelModal();
+            
+            // Show success indicator on the add button
+            const addButton = document.getElementById('addModelButton');
+            addButton.classList.add('activated');
+            
+            setTimeout(() => {
+                addButton.classList.remove('activated');
+            }, 1000);
+            
+        } catch (error) {
+            // Show error in modal
+            modelNameError.textContent = `Failed to add model: ${error.message || 'Unknown error'}`;
+            console.error('Error adding model:', error);
+        } finally {
+            // Reset button state
+            confirmAddModelButton.disabled = false;
+            confirmAddModelButton.innerHTML = originalButtonText;
+        }
+    }
+    
+    // Add event listener for add model button to show modal
+    document.getElementById('addModelButton').addEventListener('click', showAddModelModal);
+    
+    // Add event listeners for modal buttons
+    confirmAddModelButton.addEventListener('click', handleAddModel);
+    cancelAddModelButton.addEventListener('click', hideAddModelModal);
+    closeModalButton.addEventListener('click', hideAddModelModal);
+    
+    // Allow pressing Enter in the input field to submit
+    newModelNameInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleAddModel();
+        }
+    });
+    
+    // Close modal when clicking outside
+    addModelModal.addEventListener('click', function(e) {
+        if (e.target === addModelModal) {
+            hideAddModelModal();
+        }
+    });
+    
+    // Close modal when pressing Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && addModelModal.classList.contains('visible')) {
+            hideAddModelModal();
+        }
+    });
+    
+    // Common function for button activation feedback
+    function addButtonFeedback(buttonId, activeClass = 'activated', duration = 1000) {
+        const button = document.getElementById(buttonId);
+        if (button) {
+            button.addEventListener('click', function() {
+                this.classList.add(activeClass);
+                setTimeout(() => {
+                    this.classList.remove(activeClass);
+                }, duration);
+            });
+        }
+    }
+    
+    // Apply feedback to multiple buttons at once
+    function applyFeedbackToButtons(buttonIds, activeClass = 'activated', duration = 1000) {
+        buttonIds.forEach(id => addButtonFeedback(id, activeClass, duration));
+    }
+    
+    // Apply feedback to buttons
+    applyFeedbackToButtons(['sendButton', 'resetButton', 'addModelButton']);
+    
+    // Fetch model data when page loads
+    fetchModelData();
+    
     // Function to fetch history data from server
     async function fetchHistoryData() {
         try {
@@ -284,6 +496,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Fetch updated history after successful processing
             await fetchHistoryData();
+            
+            // Refresh model data in case it changed
+            await fetchModelData();
             
             // Clear any active history entry selections
             document.querySelectorAll('.history-entry').forEach(entry => {

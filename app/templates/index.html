@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Python Code Assistant</title>
 
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- CodeMirror CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/shadowfox.min.css">
@@ -69,9 +72,16 @@
                 <label for="codeInput">Python Code:</label>
                 <textarea id="codeInput"></textarea>
             </div>
+            <div class="model-selector-container">
+                <div class="model-selector">
+                    <label for="modelSelect">Model:</label>
+                    <select id="modelSelect"></select>
+                    <button id="addModelButton" title="Add new model">+</button>
+                </div>
+            </div>
             <div class="button-group">
-                <button id="sendButton">Send</button>
-                <button id="resetButton">Reset</button>
+                <button id="sendButton" class="utility-button main-button" title="Send to model">Send</button>
+                <button id="resetButton" class="utility-button main-button" title="Reset fields">Reset</button>
             </div>
         </div>
         <div class="right-panel">
@@ -87,13 +97,33 @@
                             </label>
                             <span class="toggle-label" data-mode="raw">Raw</span>
                         </div>
-                        <button id="copyToInputButton" title="Copy to input">&lt;</button>
-                        <button id="copyButton" title="Copy to clipboard">Copy</button>
+                        <button id="copyToInputButton" class="utility-button action-button" title="Copy to input">&lt;</button>
+                        <button id="copyButton" class="utility-button action-button" title="Copy to clipboard">Copy</button>
                     </div>
                 </div>
                 <div class="editor-container">
                     <textarea id="codeOutput"></textarea>
                     <div id="markdownOutput" class="markdown-output"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Add Model Modal -->
+        <div id="addModelModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Add New Model</h3>
+                    <button id="closeModalButton" class="close-button">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="newModelName">Model Name:</label>
+                        <input type="text" id="newModelName" placeholder="Enter model name...">
+                        <div id="modelNameError" class="error-message"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="cancelAddModel" class="utility-button">Cancel</button>
+                    <button id="confirmAddModel" class="utility-button primary-action">Add</button>
                 </div>
             </div>
         </div>

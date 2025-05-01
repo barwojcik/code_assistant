@@ -249,7 +249,9 @@ input:checked + .toggle-slider:before {
     transform: translateX(16px);
 }
 
-#copyButton, #copyToInputButton {
+/* Utility button styles */
+.utility-button, 
+#copyButton, #copyToInputButton, #addModelButton {
     background-color: #38383d;
     color: #b1b1b3;
     border: 1px solid #52525e;
@@ -260,15 +262,27 @@ input:checked + .toggle-slider:before {
     transition: all 0.2s ease;
 }
 
-#copyButton:hover, #copyToInputButton:hover {
+/* Main buttons (Send and Reset) should keep original size */
+.utility-button.main-button,
+.utility-button.action-button {
+    padding: 6px 14px;
+    font-size: 12px;
+}
+
+.utility-button:hover,
+#copyButton:hover, #copyToInputButton:hover, #addModelButton:hover {
     background-color: #4a4a4f;
 }
 
-#copyButton:active, #copyToInputButton:active {
+.utility-button:active,
+#copyButton:active, #copyToInputButton:active, #addModelButton:active {
     background-color: #323234;
 }
 
-#copyButton.copied, #copyToInputButton.copied {
+.utility-button.success,
+.utility-button.activated,
+#copyButton.activated, #copyToInputButton.activated, #addModelButton.success,
+#sendButton.activated, #resetButton.activated {
     background-color: #45a1ff;
     color: #0c0c0d;
     border-color: #45a1ff;
@@ -299,13 +313,14 @@ input:checked + .toggle-slider:before {
     display: flex;
     gap: 8px;
     margin-top: 15px;
+    justify-content: flex-start;
 }
 
 button {
     padding: 6px 14px;
-    background-color: #0060df;
-    color: #ffffff;
-    border: 1px solid #0060df;
+    background-color: #38383d;
+    color: #b1b1b3;
+    border: 1px solid #52525e;
     border-radius: 3px;
     cursor: pointer;
     font-weight: normal;
@@ -314,11 +329,28 @@ button {
 }
 
 button:hover {
+    background-color: #4a4a4f;
+    border-color: #4a4a4f;
+}
+
+button:active {
+    background-color: #323234;
+    border-color: #323234;
+}
+
+/* Primary action button */
+button.primary-action {
+    background-color: #0060df;
+    color: #ffffff;
+    border: 1px solid #0060df;
+}
+
+button.primary-action:hover {
     background-color: #0a84ff;
     border-color: #0a84ff;
 }
 
-button:active {
+button.primary-action:active {
     background-color: #0052cc;
     border-color: #0052cc;
 }
@@ -326,6 +358,41 @@ button:active {
 #instructions:focus, .CodeMirror-focused {
     outline: none;
     border-color: #45a1ff;
+}
+
+.model-selector-container {
+    margin: 10px 0;
+}
+
+.model-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 0;
+}
+
+.model-selector label {
+    color: #75bfff;
+    font-size: 12px;
+}
+
+.model-selector select {
+    background-color: #38383d;
+    color: #b1b1b3;
+    border: 1px solid #52525e;
+    border-radius: 3px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+}
+
+.model-selector select:focus {
+    outline: none;
+    border-color: #45a1ff;
+}
+
+.model-selector select option {
+    background-color: #1c1b22;
 }
 
 .output-group {
@@ -486,4 +553,115 @@ button:active {
 /* Add a subtle border to the code panel */
 .CodeMirror pre.CodeMirror-line {
     border-radius: 0;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.visible {
+    display: flex;
+}
+
+.modal-content {
+    background-color: #1c1b22;
+    border: 1px solid #38383d;
+    border-radius: 3px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    padding: 15px;
+    border-bottom: 1px solid #38383d;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #75bfff;
+    font-size: 14px;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    color: #737373;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+}
+
+.close-button:hover {
+    color: #b1b1b3;
+}
+
+.modal-body {
+    padding: 15px;
+}
+
+.modal-footer {
+    padding: 15px;
+    border-top: 1px solid #38383d;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    background-color: #2a2a2e;
+    color: #b1b1b3;
+    border: 1px solid #38383d;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #45a1ff;
+}
+
+.error-message {
+    color: #ff6b6b;
+    font-size: 11px;
+    margin-top: 5px;
+    min-height: 16px;
 }
