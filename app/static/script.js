@@ -293,6 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', error);
             // Display error in the output area
             outputCodeEditor.setValue(`Error: ${error.message || 'Failed to process request'}`);
+            markdownOutput.innerHTML = marked.parse(`Error: ${error.message || 'Failed to process request'}`);
             currentResponseData = null;
         } finally {
             // Reset button state
