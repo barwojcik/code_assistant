@@ -26,7 +26,7 @@ class HistoryEntry:
         instructions: User's input instructions
         code: Original code
         output_code: Processed/modified code
-        raw_response: Complete response from the system
+        raw_response: Complete response from the model
         timestamp: When the entry was created
     """
 
@@ -44,9 +44,6 @@ class HistoryHandler:
     This class is designed to maintain a collection of history entries up to a predefined or user-specified maximum
     length. When the maximum limit is reached, the oldest entry is automatically removed as new entries are added.
     It also provides methods for adding new history entries and retrieving the current list of history entries.
-
-    Attributes:
-        history_max_length (int): Maximum length of the history. Defaults to 10.
 
     Methods:
         add_new_entry: Adds a new entry to the history.

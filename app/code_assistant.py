@@ -136,7 +136,7 @@ class CodeAssistantApp:
             <head><title>Code Assistant - Error</title></head>
             <body>
                 <h1>Error loading application</h1>
-                <p>The application encountered an error. Please check server logs.</p>
+                <p>The application encountered an error.</p>
             </body>
             </html>
             """
@@ -164,6 +164,7 @@ class CodeAssistantApp:
             self.app.logger.info('Added new history entry')
 
             return jsonify({
+                "success": True,
                 'output': output_code,
                 'raw_response': response_text,
             }), 200
@@ -204,6 +205,7 @@ class CodeAssistantApp:
         try:
             return jsonify(
                 {
+                    "success": True,
                     "available_models": self.code_generator.get_available_model_names(),
                     "current_model": self.code_generator.get_current_model_name(),
                 }
