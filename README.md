@@ -50,7 +50,7 @@ A web-based tool that uses AI to help you write, refactor, and optimize Python c
    python app/app.py
    ```
 
-6. Open your browser and navigate to (default setup):
+6. Open your browser and navigate to (default config):
    ```
    http://localhost:5000
    ```
@@ -77,10 +77,31 @@ A web-based tool that uses AI to help you write, refactor, and optimize Python c
    docker run --network host --name code-assistant code-assistant
    ```
    
-5. Open your browser and navigate to (default setup):
+5. Open your browser and navigate to (default config):
    ```
    http://localhost:5000
    ```
+   
+## Configuration
+The configuration file `config.py` allows you to customize the application's behavior, by extending the base Flask configuration with custom keys.
+
+### History
+The `MAX_HISTORY_LENGTH` key enables you to configure the maximum number of storied entries that can be visible in the **Session History** panel.
+```python
+MAX_HISTORY_LENGTH = 10
+```
+### Ollama
+The `OLLAMA` configuration key provides control over the client, custom prompt function injection, and passing additional arguments to Ollama's generate function. This enables you to fine-tune the application's behavior for optimal code generation results.
+```python
+OLLAMA = dict(
+    ollama_model='model name',
+    ollama_host='host:port',
+    prompt_function=lambda instruction, code: f'prompt template ({instruction}, {code})',
+    generate_kwargs=dict(
+        system='system message',
+    ),
+)
+```
    
 ## Usage
 
