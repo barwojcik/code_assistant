@@ -160,22 +160,16 @@ class OllamaCodeGenerator:
             return output_code
 
         if self.PYTHON_START_TOKEN in output_code:
-            output_code = output_code.split(self.PYTHON_START_TOKEN)[1].split(
-                self.CODE_TOKEN
-            )[0]
+            output_code = output_code.split(self.PYTHON_START_TOKEN)[1].split(self.CODE_TOKEN)[0]
         else:
-            output_code = output_code.split(self.CODE_TOKEN)[1].split(self.CODE_TOKEN)[
-                0
-            ]
+            output_code = output_code.split(self.CODE_TOKEN)[1].split(self.CODE_TOKEN)[0]
 
         if output_code.startswith("\n"):
             output_code = output_code[1:]
 
         return output_code
 
-    def generate_code(
-        self, user_instruction: str, user_code: Optional[str] = None
-    ) -> tuple[str, str]:
+    def generate_code(self, user_instruction: str, user_code: Optional[str] = None) -> tuple[str, str]:
         """
         Generate a Python code based on the provided instructions.
 
@@ -224,9 +218,7 @@ class OllamaCodeGenerator:
             list[str]: List of available model names.
         """
         available_models: ListResponse = self._get_available_models()
-        available_model_names: list[str] = [
-            model.model for model in available_models.models
-        ]
+        available_model_names: list[str] = [model.model for model in available_models.models]
         return available_model_names
 
     def get_current_model_name(self) -> str:
@@ -274,9 +266,7 @@ class OllamaCodeGenerator:
             logger.info("Model %s found in available models", model_name)
             return True
 
-        logger.warning(
-            "Model %s not found, attempting to pull from repository", model_name
-        )
+        logger.warning("Model %s not found, attempting to pull from repository", model_name)
         try:
             self._client.pull(model_name)
             logger.info("Model %s successfully pulled", model_name)
@@ -290,7 +280,8 @@ class OllamaCodeGenerator:
         Sets the active Ollama model for code generation.
 
         This method checks if the specified model is available and returns False if it is not.
-        If the model is available, it sets the _ollama_model attribute and logs a message indicating the model has been set.
+        If the model is available, it sets the _ollama_model attribute and logs a message
+        indicating the model has been set.
 
         Args:
             model_name (str): The name of the model to set as active.

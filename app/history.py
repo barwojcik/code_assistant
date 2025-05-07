@@ -77,9 +77,7 @@ class HistoryHandler:
 
         self._history_max_length: int = max_history_length
         self._history: Deque[HistoryEntry] = deque([], self._history_max_length)
-        logger.info(
-            "Initialized HistoryHandler with max length: %d", self._history_max_length
-        )
+        logger.info("Initialized HistoryHandler with max length: %d", self._history_max_length)
 
     def add_new_entry(self, entry: HistoryEntry) -> None:
         """

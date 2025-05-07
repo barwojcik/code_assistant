@@ -162,18 +162,12 @@ class CodeAssistantApp:
         try:
             user_instruction = request.json["userInstruction"]
             user_code = request.json["userCode"]
-            self.app.logger.info(
-                "User instruction: %s for code: %s", user_instruction, user_code
-            )
+            self.app.logger.info("User instruction: %s for code: %s", user_instruction, user_code)
 
-            response_text, output_code = self.code_generator.generate_code(
-                user_instruction, user_code
-            )
+            response_text, output_code = self.code_generator.generate_code(user_instruction, user_code)
             self.app.logger.info("Output code: %s", output_code)
 
-            history_entry = HistoryEntry(
-                user_instruction, user_code, output_code, response_text
-            )
+            history_entry = HistoryEntry(user_instruction, user_code, output_code, response_text)
             self.history.add_new_entry(history_entry)
             self.app.logger.info("Added new history entry")
 
