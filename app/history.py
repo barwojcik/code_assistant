@@ -1,5 +1,13 @@
 """
 Module containing functions to manage and store history.
+
+This module provides classes and functions for managing a collection of history entries,
+including adding new entries, retrieving the current list of entries, and maintaining a fixed maximum length.
+
+Classes:
+    HistoryEntry: Represents an entry in the history log.
+    HistoryHandler: Handles a collection of history entries with a fixed maximum length.
+
 """
 
 import logging

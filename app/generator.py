@@ -72,6 +72,14 @@ class OllamaCodeGenerator:
             self._is_model_initialized = self._init_model()
 
     def _init_model(self) -> bool:
+        """
+        Initializes the model instance by checking availability and falling back to default if necessary.
+
+        If an Ollama model is available, it is used; otherwise, the default model is employed.
+
+        Returns:
+            bool: True if a suitable model was found, False otherwise.
+        """
         if self.is_model_available(self._ollama_model):
             return True
 
@@ -117,14 +125,16 @@ class OllamaCodeGenerator:
 
     def _get_prompt(self, user_instruction: str, user_code: str) -> str:
         """
-        Generate a prompt for code generation.
+        Generates a prompt to facilitate code generation based on user input.
+
+        The generated prompt is either customized through a user-provided function or defaults to a predefined template.
 
         Args:
-            user_instruction (str): Instructions to generate code from.
-            user_code (str): Code to use as input.
+            user_instruction (str): User-provided instruction for generating code.
+            user_code (str): Code provided by the user as input.
 
         Returns:
-            str: Prompt to use for generating code.
+            str: Prompt to use for generating code
         """
         if self._custom_prompt_fn:
             try:
@@ -137,7 +147,7 @@ class OllamaCodeGenerator:
 
     def _extract_code(self, response_text: str) -> str:
         """
-        Extracts code from markdown-formatted text that contains code blocks.
+        Extracts code from markdown-formatted text that contains code block.
 
         Args:
             response_text (str): String containing markdown-formatted text with possible code blocks
@@ -196,6 +206,10 @@ class OllamaCodeGenerator:
 
     def _get_available_models(self) -> ListResponse:
         """
+        Retrieves available models from Ollama service.
+
+        Returns:
+            ListResponse: List of available models.
 
         """
         return self._client.list()
@@ -239,7 +253,18 @@ class OllamaCodeGenerator:
         return True
 
     def is_model_available(self, model_name: str) -> bool:
-        """Check if a specified model is available."""
+        """
+        Checks if a specified Ollama model is available for use.
+
+        If the model is found in the list of available models, it returns True.
+        Otherwise, it attempts to pull the model from the repository and returns True on success or False on failure.
+
+        Args:
+            model_name (str): The name of the model to check for availability.
+
+        Returns:
+            bool: True if the model is available, False otherwise.
+        """
         available_model_names: list[str] = self.get_available_model_names()
         if model_name in available_model_names:
             logger.info('Model %s found in available models', model_name)
@@ -255,7 +280,18 @@ class OllamaCodeGenerator:
             return False
 
     def set_model(self, model_name: str) -> bool:
-        """Set the active model for code generation."""
+        """
+        Sets the active Ollama model for code generation.
+
+        This method checks if the specified model is available and returns False if it is not.
+        If the model is available, it sets the _ollama_model attribute and logs a message indicating the model has been set.
+
+        Args:
+            model_name (str): The name of the model to set as active.
+
+        Returns:
+            bool: True if the model was successfully set, False otherwise.
+        """
         if not self.is_model_available(model_name):
             return False
 

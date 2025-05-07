@@ -2,7 +2,6 @@
 Code Assistant Application Module
 
 This module provides the basic structure for creating a Flask application with routing for different endpoints.
-It also includes helper functions to manage history entries.
 
 Classes:
     CodeAssistantApp: Initializes the Code Assistant application.
@@ -31,13 +30,25 @@ class CodeAssistantApp:
     """
 
     def __init__(self) -> None:
+        """
+        Initializes the CodeAssistantApp object with default values.
+
+        The instance stores references to a Flask app, a code generator, and a history handler.
+        These references can be updated during the execution of the program.
+
+        Attributes:
+            app (Flask): The Flask application instance.
+            code_generator (OllamaCodeGenerator): The code generator instance.
+            history (HistoryHandler): The history handler instance.
+        """
+
         self.app: Optional[Flask] = None
         self.code_generator: Optional[OllamaCodeGenerator] = None
         self.history: Optional[HistoryHandler] = None
 
     def create_app(self) -> Flask:
         """
-        Initializes and configures the Flask application.
+        Initializes and configures the CodeAssistantApp application.
 
         Returns:
             Flask application instance.
@@ -170,13 +181,13 @@ class CodeAssistantApp:
             }), 200
 
         except KeyError as e:
-            self.app.logger.error('Missing key in request data: %s', e)
+            self.app.logger.error('Missing key: %s', e)
             return jsonify({'error': f'Missing required field: {str(e)}'}), 400
         except ConnectionError as e:
             self.app.logger.error('Connection error: %s', e)
             return jsonify({'error': 'Ollama service is not available'}), 503
         except Exception as e:
-            self.app.logger.error('Error processing message: %s', e)
+            self.app.logger.error('Error processing instructions: %s', e)
             return jsonify({'error': 'Internal server error'}), 500
 
     def _process_model(self) -> tuple[Response, int]:
@@ -211,7 +222,7 @@ class CodeAssistantApp:
                 }
             ), 200
         except Exception as e:
-            self.app.logger.error('Error processing message: %s', e)
+            self.app.logger.error('Error processing request: %s', e)
             return jsonify({'error': 'Internal server error'}), 500
 
     def _process_set_model(self) -> tuple[Response, int]:
@@ -227,13 +238,12 @@ class CodeAssistantApp:
             self.app.logger.info('Setting model to %s', model_name)
             if self.code_generator.set_model(model_name):
                 return jsonify({"success": True}), 200
-            else:
-                return jsonify({"success": False, "error": "Invalid model name"}), 400
+            return jsonify({"success": False, "error": "Invalid model name"}), 400
         except KeyError as e:
-            self.app.logger.error('Missing key in request data: %s', e)
+            self.app.logger.error('Missing key: %s', e)
             return jsonify({'error': f'Missing required field: {str(e)}'}), 400
         except Exception as e:
-            self.app.logger.error('Error processing message: %s', e)
+            self.app.logger.error('Error processing request: %s', e)
             return jsonify({'error': 'Internal server error'}), 500
 
     def _get_history(self) -> tuple[Response, int]:
