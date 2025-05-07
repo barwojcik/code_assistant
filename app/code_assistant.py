@@ -56,20 +56,20 @@ class CodeAssistantApp:
         self.app = Flask(__name__)
         CORS(self.app, resources={r"/*": {"origins": "*"}})
 
-        self.app.config.from_object('config')
+        self.app.config.from_object("config")
         cfg = self.app.config
 
-        if 'LOG_LEVEL' in cfg.keys():
-            self.app.logger.setLevel(cfg['LOG_LEVEL'])
-        self.app.logger.info('Initialized Flask application')
+        if "LOG_LEVEL" in cfg.keys():
+            self.app.logger.setLevel(cfg["LOG_LEVEL"])
+        self.app.logger.info("Initialized Flask application")
 
-        if 'OLLAMA' in cfg.keys():
-            self.code_generator = OllamaCodeGenerator.from_config(cfg['OLLAMA'])
+        if "OLLAMA" in cfg.keys():
+            self.code_generator = OllamaCodeGenerator.from_config(cfg["OLLAMA"])
         else:
             self.code_generator = OllamaCodeGenerator()
 
-        if 'MAX_HISTORY_LENGTH' in cfg.keys():
-            self.history = HistoryHandler(max_history_length=cfg['MAX_HISTORY_LENGTH'])
+        if "MAX_HISTORY_LENGTH" in cfg.keys():
+            self.history = HistoryHandler(max_history_length=cfg["MAX_HISTORY_LENGTH"])
         else:
             self.history = HistoryHandler()
 
@@ -85,45 +85,45 @@ class CodeAssistantApp:
         """
         # Main page route
         self.app.add_url_rule(
-            '/',
-            endpoint='index',
+            "/",
+            endpoint="index",
             view_func=self._index,
-            methods=['GET'],
+            methods=["GET"],
         )
-        self.app.logger.info('Initialized routes for main page')
+        self.app.logger.info("Initialized routes for main page")
 
         # API routes
         self.app.add_url_rule(
-            '/api/v1/instructions',
-            endpoint='process_instruction',
+            "/api/v1/instructions",
+            endpoint="process_instruction",
             view_func=self._process_instruction,
-            methods=['POST'],
+            methods=["POST"],
         )
-        self.app.logger.info('Initialized route for processing instructions')
+        self.app.logger.info("Initialized route for processing instructions")
 
         self.app.add_url_rule(
-            '/api/v1/model',
-            endpoint='process_set_model',
+            "/api/v1/model",
+            endpoint="process_set_model",
             view_func=self._process_model,
-            methods=['GET', 'POST'],
+            methods=["GET", "POST"],
         )
 
         self.app.add_url_rule(
-            '/api/v1/history',
-            endpoint='get_history',
+            "/api/v1/history",
+            endpoint="get_history",
             view_func=self._get_history,
-            methods=['GET'],
+            methods=["GET"],
         )
-        self.app.logger.info('Initialized route for retrieving history')
+        self.app.logger.info("Initialized route for retrieving history")
 
         # Health check endpoint for monitoring
         self.app.add_url_rule(
-            '/api/v1/health',
-            endpoint='health_check',
+            "/api/v1/health",
+            endpoint="health_check",
             view_func=self._health_check,
-            methods=['GET'],
+            methods=["GET"],
         )
-        self.app.logger.info('Initialized route for health check')
+        self.app.logger.info("Initialized route for health check")
 
     def _index(self) -> str:
         """
@@ -136,10 +136,10 @@ class CodeAssistantApp:
             TemplateNotFound: If the template file is missing
         """
         try:
-            self.app.logger.info('Rendering index page')
-            return render_template('index.html')
+            self.app.logger.info("Rendering index page")
+            return render_template("index.html")
         except Exception as e:
-            self.app.logger.error('Error rendering index page: %s', e)
+            self.app.logger.error("Error rendering index page: %s", e)
             # Return a minimal error page if template rendering fails
             return """
             <!DOCTYPE html>
@@ -160,35 +160,43 @@ class CodeAssistantApp:
             tuple[Response, int]: JSON response and HTTP status code
         """
         try:
-            user_instruction = request.json['userInstruction']
-            user_code = request.json['userCode']
-            self.app.logger.info('User instruction: %s for code: %s',
-                               user_instruction, user_code)
+            user_instruction = request.json["userInstruction"]
+            user_code = request.json["userCode"]
+            self.app.logger.info(
+                "User instruction: %s for code: %s", user_instruction, user_code
+            )
 
             response_text, output_code = self.code_generator.generate_code(
-                user_instruction, user_code)
-            self.app.logger.info('Output code: %s', output_code)
+                user_instruction, user_code
+            )
+            self.app.logger.info("Output code: %s", output_code)
 
             history_entry = HistoryEntry(
-                user_instruction, user_code, output_code, response_text)
+                user_instruction, user_code, output_code, response_text
+            )
             self.history.add_new_entry(history_entry)
-            self.app.logger.info('Added new history entry')
+            self.app.logger.info("Added new history entry")
 
-            return jsonify({
-                "success": True,
-                'output': output_code,
-                'raw_response': response_text,
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "output": output_code,
+                        "raw_response": response_text,
+                    }
+                ),
+                200,
+            )
 
         except KeyError as e:
-            self.app.logger.error('Missing key: %s', e)
-            return jsonify({'error': f'Missing required field: {str(e)}'}), 400
+            self.app.logger.error("Missing key: %s", e)
+            return jsonify({"error": f"Missing required field: {str(e)}"}), 400
         except ConnectionError as e:
-            self.app.logger.error('Connection error: %s', e)
-            return jsonify({'error': 'Ollama service is not available'}), 503
+            self.app.logger.error("Connection error: %s", e)
+            return jsonify({"error": "Ollama service is not available"}), 503
         except Exception as e:
-            self.app.logger.error('Error processing instructions: %s', e)
-            return jsonify({'error': 'Internal server error'}), 500
+            self.app.logger.error("Error processing instructions: %s", e)
+            return jsonify({"error": "Internal server error"}), 500
 
     def _process_model(self) -> tuple[Response, int]:
         """
@@ -198,7 +206,7 @@ class CodeAssistantApp:
             tuple[Response, int]: A tuple containing a `Response` object and an integer indicating
                 the HTTP status code.
         """
-        if request.method == 'GET':
+        if request.method == "GET":
             return self._process_get_model()
 
         return self._process_set_model()
@@ -214,16 +222,19 @@ class CodeAssistantApp:
                 actively selected model.
         """
         try:
-            return jsonify(
-                {
-                    "success": True,
-                    "available_models": self.code_generator.get_available_model_names(),
-                    "current_model": self.code_generator.get_current_model_name(),
-                }
-            ), 200
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "available_models": self.code_generator.get_available_model_names(),
+                        "current_model": self.code_generator.get_current_model_name(),
+                    }
+                ),
+                200,
+            )
         except Exception as e:
-            self.app.logger.error('Error processing request: %s', e)
-            return jsonify({'error': 'Internal server error'}), 500
+            self.app.logger.error("Error processing request: %s", e)
+            return jsonify({"error": "Internal server error"}), 500
 
     def _process_set_model(self) -> tuple[Response, int]:
         """
@@ -234,17 +245,17 @@ class CodeAssistantApp:
             tuple[Response, int]: A tuple containing a ``Response`` object and an integer status code.
         """
         try:
-            model_name = request.json['model']
-            self.app.logger.info('Setting model to %s', model_name)
+            model_name = request.json["model"]
+            self.app.logger.info("Setting model to %s", model_name)
             if self.code_generator.set_model(model_name):
                 return jsonify({"success": True}), 200
             return jsonify({"success": False, "error": "Invalid model name"}), 400
         except KeyError as e:
-            self.app.logger.error('Missing key: %s', e)
-            return jsonify({'error': f'Missing required field: {str(e)}'}), 400
+            self.app.logger.error("Missing key: %s", e)
+            return jsonify({"error": f"Missing required field: {str(e)}"}), 400
         except Exception as e:
-            self.app.logger.error('Error processing request: %s', e)
-            return jsonify({'error': 'Internal server error'}), 500
+            self.app.logger.error("Error processing request: %s", e)
+            return jsonify({"error": "Internal server error"}), 500
 
     def _get_history(self) -> tuple[Response, int]:
         """
@@ -256,11 +267,14 @@ class CodeAssistantApp:
         try:
             history_entries = self.history.get_history()
             history_data = [asdict(entry) for entry in history_entries]
-            self.app.logger.info('Retrieved %d history entries', len(history_data))
+            self.app.logger.info("Retrieved %d history entries", len(history_data))
             return jsonify({"success": True, "history": history_data}), 200
         except Exception as e:
-            self.app.logger.error('Error retrieving history: %s', e)
-            return jsonify({"success": False, "error": "Failed to retrieve history"}), 500
+            self.app.logger.error("Error retrieving history: %s", e)
+            return (
+                jsonify({"success": False, "error": "Failed to retrieve history"}),
+                500,
+            )
 
     def _health_check(self) -> tuple[Response, int]:
         """
@@ -270,21 +284,29 @@ class CodeAssistantApp:
             tuple[Response, int]: JSON response with service status and HTTP status code
         """
         if self.code_generator.is_service_available():
-            return jsonify({
-                "status": "healthy",
-                "services": {
-                    "ollama": "up",
-                },
-                "version": "1.0.0"
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "status": "healthy",
+                        "services": {
+                            "ollama": "up",
+                        },
+                        "version": "1.0.0",
+                    }
+                ),
+                200,
+            )
 
-        return jsonify({
-            "status": "degraded",
-            "services": {
-                "ollama": "down"
-            },
-            "error": "Ollama service is not available"
-        }), 503
+        return (
+            jsonify(
+                {
+                    "status": "degraded",
+                    "services": {"ollama": "down"},
+                    "error": "Ollama service is not available",
+                }
+            ),
+            503,
+        )
 
     def run(self, **kwargs):
         """
@@ -299,4 +321,4 @@ class CodeAssistantApp:
         if not self.app:
             raise RuntimeError("Application not initialized. Call create_app() first.")
         self.app.run(**kwargs)
-        self.app.logger.info('Application running')
+        self.app.logger.info("Application running")

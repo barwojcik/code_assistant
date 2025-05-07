@@ -3,6 +3,7 @@ Code Assistant configuration file.
 For Flask configuration, see: https://flask.palletsprojects.com/en/2.2.x/config/
 For Ollama, see: https://github.com/ollama/ollama/blob/main/docs/api.md
 """
+
 import logging
 
 DEBUG = True

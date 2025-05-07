@@ -37,16 +37,16 @@ class OllamaCodeGenerator:
         check_availability: Check if the Ollama service is available.
     """
 
-    DEFAULT_MODEL: str = 'llama3.2:1b'
-    PYTHON_START_TOKEN: str = '```python\n'
-    CODE_TOKEN: str = '```'
+    DEFAULT_MODEL: str = "llama3.2:1b"
+    PYTHON_START_TOKEN: str = "```python\n"
+    CODE_TOKEN: str = "```"
 
     def __init__(
-            self,
-            ollama_model: Optional[str] = None,
-            ollama_host: Optional[str] = None,
-            prompt_function: Optional[Callable[[str, str], str]] = None,
-            generate_kwargs: Optional[dict[str, Any]] = None,
+        self,
+        ollama_model: Optional[str] = None,
+        ollama_host: Optional[str] = None,
+        prompt_function: Optional[Callable[[str, str], str]] = None,
+        generate_kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         """
         Initialize the OllamaCodeGenerator class.
@@ -61,12 +61,12 @@ class OllamaCodeGenerator:
         self._default_ollama_model: str = self.DEFAULT_MODEL
         if not ollama_model:
             ollama_model = self.DEFAULT_MODEL
-        logger.info('Initializing OllamaCodeGenerator with model: %s', ollama_model)
+        logger.info("Initializing OllamaCodeGenerator with model: %s", ollama_model)
         self._ollama_model: str = ollama_model
         self._is_model_initialized: bool = False
         self._client: Client = Client(host=ollama_host)
         self._custom_prompt_fn: Optional[Callable[[str, str], str]] = prompt_function
-        self._generate_kwargs: dict = (generate_kwargs or dict())
+        self._generate_kwargs: dict = generate_kwargs or dict()
 
         if self.is_service_available():
             self._is_model_initialized = self._init_model()
@@ -86,7 +86,7 @@ class OllamaCodeGenerator:
         if self._ollama_model == self.DEFAULT_MODEL:
             return False
 
-        logger.warning('Falling back to default model %s', self.DEFAULT_MODEL)
+        logger.warning("Falling back to default model %s", self.DEFAULT_MODEL)
         if self.is_model_available(self.DEFAULT_MODEL):
             self._ollama_model = self.DEFAULT_MODEL
             return True
@@ -107,7 +107,7 @@ class OllamaCodeGenerator:
         return cls(**config)
 
     @staticmethod
-    def _default_prompt_fn(user_instruction:str, user_code: str) -> str:
+    def _default_prompt_fn(user_instruction: str, user_code: str) -> str:
         """
         Generate a prompt for code generation.
 
@@ -119,8 +119,8 @@ class OllamaCodeGenerator:
             str: Prompt to use for generating code.
         """
         return (
-            f'Based on this instructions:\n{user_instruction}\n and provided python code:\n'
-            f'{user_code}\n generate python code.'
+            f"Based on this instructions:\n{user_instruction}\n and provided python code:\n"
+            f"{user_code}\n generate python code."
         )
 
     def _get_prompt(self, user_instruction: str, user_code: str) -> str:
@@ -140,8 +140,8 @@ class OllamaCodeGenerator:
             try:
                 return self._custom_prompt_fn(user_instruction, user_code)
             except Exception as e:
-                logger.error('Error in custom prompt function: %s', e)
-                logger.error('Falling back to default prompt')
+                logger.error("Error in custom prompt function: %s", e)
+                logger.error("Falling back to default prompt")
 
         return self._default_prompt_fn(user_instruction, user_code)
 
@@ -160,9 +160,13 @@ class OllamaCodeGenerator:
             return output_code
 
         if self.PYTHON_START_TOKEN in output_code:
-            output_code = output_code.split(self.PYTHON_START_TOKEN)[1].split(self.CODE_TOKEN)[0]
+            output_code = output_code.split(self.PYTHON_START_TOKEN)[1].split(
+                self.CODE_TOKEN
+            )[0]
         else:
-            output_code = output_code.split(self.CODE_TOKEN)[1].split(self.CODE_TOKEN)[0]
+            output_code = output_code.split(self.CODE_TOKEN)[1].split(self.CODE_TOKEN)[
+                0
+            ]
 
         if output_code.startswith("\n"):
             output_code = output_code[1:]
@@ -170,9 +174,7 @@ class OllamaCodeGenerator:
         return output_code
 
     def generate_code(
-            self,
-            user_instruction: str,
-            user_code: Optional[str] = None
+        self, user_instruction: str, user_code: Optional[str] = None
     ) -> tuple[str, str]:
         """
         Generate a Python code based on the provided instructions.
@@ -187,20 +189,20 @@ class OllamaCodeGenerator:
         if not self._is_model_initialized:
             self._init_model()
 
-        user_code = (user_code or "(no code provided)")
+        user_code = user_code or "(no code provided)"
         ollama_response: GenerateResponse = self._client.generate(
             model=self._ollama_model,
             prompt=self._get_prompt(user_instruction, user_code),
             stream=False,
             **self._generate_kwargs,
         )
-        logger.debug('Ollama response: %s', ollama_response)
+        logger.debug("Ollama response: %s", ollama_response)
 
         response_text: str = ollama_response.response
-        logger.debug('Response text: %s', response_text)
+        logger.debug("Response text: %s", response_text)
 
         output_code: str = self._extract_code(response_text)
-        logger.debug('Generated code: %s', output_code)
+        logger.debug("Generated code: %s", output_code)
 
         return response_text, output_code
 
@@ -222,7 +224,9 @@ class OllamaCodeGenerator:
             list[str]: List of available model names.
         """
         available_models: ListResponse = self._get_available_models()
-        available_model_names: list[str] = [model.model for model in available_models.models]
+        available_model_names: list[str] = [
+            model.model for model in available_models.models
+        ]
         return available_model_names
 
     def get_current_model_name(self) -> str:
@@ -244,10 +248,10 @@ class OllamaCodeGenerator:
         try:
             _ = self._get_available_models()
         except ConnectionError as e:
-            logger.error('Ollama connection error: %s', e)
+            logger.error("Ollama connection error: %s", e)
             return False
         except Exception as e:
-            logger.error('Ollama service is not available: %s', e)
+            logger.error("Ollama service is not available: %s", e)
             return False
 
         return True
@@ -267,16 +271,18 @@ class OllamaCodeGenerator:
         """
         available_model_names: list[str] = self.get_available_model_names()
         if model_name in available_model_names:
-            logger.info('Model %s found in available models', model_name)
+            logger.info("Model %s found in available models", model_name)
             return True
 
-        logger.warning('Model %s not found, attempting to pull from repository', model_name)
+        logger.warning(
+            "Model %s not found, attempting to pull from repository", model_name
+        )
         try:
             self._client.pull(model_name)
-            logger.info('Model %s successfully pulled', model_name)
+            logger.info("Model %s successfully pulled", model_name)
             return True
         except Exception as e:
-            logger.error('Failed to pull model %s: %s', model_name, e)
+            logger.error("Failed to pull model %s: %s", model_name, e)
             return False
 
     def set_model(self, model_name: str) -> bool:
@@ -297,5 +303,5 @@ class OllamaCodeGenerator:
 
         self._ollama_model = model_name
         self._is_model_initialized = True
-        logger.info('Model set to %s', model_name)
+        logger.info("Model set to %s", model_name)
         return True
