@@ -6,6 +6,7 @@ The module calls the function that initializes an instance of the CodeAssistantA
 Functions:
     main: Runs the Flask application.
 """
+
 from code_assistant import CodeAssistantApp
 
 

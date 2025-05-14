@@ -7,6 +7,7 @@ Classes:
     CodeAssistantApp: Initializes the Code Assistant application.
 """
 
+import logging
 from dataclasses import asdict
 from typing import Optional
 from flask import Flask, render_template, request, jsonify, Response
@@ -60,7 +61,7 @@ class CodeAssistantApp:
         cfg = self.app.config
 
         if "LOG_LEVEL" in cfg.keys():
-            self.app.logger.setLevel(cfg["LOG_LEVEL"])
+            logging.basicConfig(level=cfg["LOG_LEVEL"])
         self.app.logger.info("Initialized Flask application")
 
         if "OLLAMA" in cfg.keys():
